@@ -13,7 +13,7 @@ import {
 import clsx from "clsx";
 import {
     AccountCircle, AddCircleOutline,
-    ChevronLeft, EditAttributesOutlined, EditOutlined, ListOutlined,
+    ChevronLeft, EditOutlined, ListOutlined,
     Menu as MenuIcon,
     Notifications,
 } from "@material-ui/icons";

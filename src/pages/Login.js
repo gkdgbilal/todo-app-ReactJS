@@ -2,10 +2,9 @@ import React, {useContext} from "react";
 import {
     Avatar,
     Button,
-    Checkbox,
     Container,
     CssBaseline,
-    FormControlLabel, Grid, Link,
+    Grid, Link,
     TextField,
     Typography
 } from "@material-ui/core";
@@ -15,6 +14,8 @@ import {useHistory} from "react-router-dom";
 import * as yup from 'yup';
 import {useFormik} from "formik";
 import axios from "axios";
+import {Alert} from "@material-ui/lab";
+import {AuthContext} from "../App";
 
 const useStyles = makeStyles((theme) => ({
     paper: {
@@ -44,34 +45,35 @@ const validationSchema = yup.object({
 
 export default function Login() {
     const classes = useStyles();
-    // const history = useHistory()
-    // const {setAuth} = useContext(AuthContext)
-    //
-    // const formik = useFormik({
-    //     initialValues: {
-    //         username: '',
-    //         password: '',
-    //     },
-    //     validationSchema: validationSchema,
-    //     onSubmit: (values, actions) => {
-    //         // alert(JSON.stringify(values, null, 2));
-    //         axios({
-    //             method: 'post',
-    //             url: 'http://localhost:8000/users',
-    //             data: values
-    //         }).then((response) => {
-    //             localStorage.setItem("access_token", response.data.token)
-    //             setAuth({isAuth: true})
-    //             history.push("/")
-    //         }).catch((error) => {
-    //             if (error.response) {
-    //                 actions.setStatus({error: error.response.data.message})
-    //                 return
-    //             }
-    //             actions.setStatus({error: error.toString()})
-    //         })
-    //     },
-    // });
+    const history = useHistory()
+    const {setAuth} = useContext(AuthContext)
+
+    const formik = useFormik({
+        initialValues: {
+            username: '',
+            password: '',
+        },
+        validationSchema: validationSchema,
+        onSubmit: (values, actions) => {
+            // alert(JSON.stringify(values, null, 2));
+            axios({
+                method: 'post',
+                url: 'http://localhost:8000/v1/log-in',
+                data: values
+            }).then((response) => {
+                localStorage.setItem("access_token", response.data.token)
+                setAuth({isAuth: true})
+                console.log(response)
+                history.push("/")
+            }).catch((error) => {
+                if (error.response) {
+                    actions.setStatus({error: error.response.data.message})
+                    return
+                }
+                actions.setStatus({error: error.toString()})
+            })
+        },
+    });
 
     return <>
         <Container component="main" maxWidth="xs">
@@ -83,17 +85,25 @@ export default function Login() {
                 <Typography component="h1" variant="h5">
                     Sign in
                 </Typography>
-                <form className={classes.form} noValidate>
+                <form className={classes.form} noValidate
+                      onSubmit={formik.handleSubmit}
+                >
+                    {formik.status && formik.status.error &&
+                    <Alert className={classes.formElement} severity="error">{formik.status.error}</Alert>}
                     <TextField
                         variant="outlined"
                         margin="normal"
                         required
                         fullWidth
-                        id="email"
-                        label="Email Address"
-                        name="email"
-                        autoComplete="email"
+                        id="username"
+                        label="username"
+                        name="username"
+                        autoComplete="username"
                         autoFocus
+                        value={formik.values.username}
+                        onChange={formik.handleChange}
+                        error={formik.touched.username && Boolean(formik.errors.username)}
+                        helperText={formik.touched.username && formik.errors.username}
                     />
                     <TextField
                         variant="outlined"
@@ -105,11 +115,15 @@ export default function Login() {
                         type="password"
                         id="password"
                         autoComplete="current-password"
+                        value={formik.values.password}
+                        onChange={formik.handleChange}
+                        error={formik.touched.password && Boolean(formik.errors.password)}
+                        helperText={formik.touched.password && formik.errors.password}
                     />
-                    <FormControlLabel
-                        control={<Checkbox value="remember" color="primary"/>}
-                        label="Remember me"
-                    />
+                    {/*<FormControlLabel*/}
+                    {/*    control={<Checkbox value="remember" color="primary"/>}*/}
+                    {/*    label="Remember me"*/}
+                    {/*/>*/}
                     <Button
                         type="submit"
                         fullWidth

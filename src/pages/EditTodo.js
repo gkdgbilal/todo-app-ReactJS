@@ -1,7 +1,7 @@
 import {makeStyles} from "@material-ui/core/styles";
 import {
-    Avatar, Button,
-    Container,
+    Avatar, Button, Checkbox,
+    Container, FormControlLabel,
     Grid,
     TextField,
     Typography
@@ -12,7 +12,7 @@ import * as yup from 'yup';
 import axios from "axios";
 import {useHistory, useParams} from "react-router-dom";
 import {Alert} from "@material-ui/lab";
-import {useEffect, useState} from "react";
+import React, {useEffect, useState} from "react";
 
 const useStyles = makeStyles((theme) => ({
     paper: {
@@ -47,36 +47,57 @@ export default function EditTodo() {
     const classes = useStyles();
     const [todos, setTodos] = useState([])
     const history = useHistory();
-    // console.log("edit value",editValue)
     let ignored = false
     const formik = useFormik({
         initialValues: {
-            id: todos.id,
-            title: todos.title,
-            description: todos.description,
-            done: todos.done
+            // id: todos.id,
+            title: "",
+            description: "",
+            // completed: null
         },
         validationSchema: validationSchema,
         onSubmit: (updatedState, actions) => {
             // alert(JSON.stringify(values, null, 2));
-            axios.put('http://localhost:8000/todos/edit/' + updatedState.id, {...updatedState})
-                .then(res => {
-                    setTodos(prevState => prevState.map(todo => (todo.id === res.data.id ? {
-                        ...todo,
-                        id: res.data.id,
-                        title: res.data.title,
-                        description: res.data.description,
-                        done: res.data.done
-                    } : todo)))
-                })
-                .catch((error) => {
-                    if (error.response) {
-                        actions.setStatus({error: error.response.data.message})
-                        return
-                    }
-                    actions.setStatus({error: error.toString()})
-                }).finally(() => {
+            // axios.put('http://localhost:8000/v1/todos/', {...updatedState})
+            //     .then(res => {
+            //         setTodos(prevState => prevState.map(todo => (todo.id === res.data.id ? {
+            //             ...todo,
+            //             // id: res.data.id,
+            //             title: res.data.title,
+            //             description: res.data.description,
+            //             completed: res.data.completed
+            //         } : todo)))
+            //     })
+            //     .catch((error) => {
+            //         if (error.response) {
+            //             actions.setStatus({error: error.response.data.message})
+            //             return
+            //         }
+            //         actions.setStatus({error: error.toString()})
+            //     }).finally(() => {
+            //     history.push("/")
+            // })
+            axios({
+                method: 'put',
+                url: 'http://localhost:8000/v1/todos',
+                data: {
+                    id: updatedState.id,
+                    title: updatedState.title,
+                    description: updatedState,
+                    completed: updatedState.completed
+                },
+                // secure: true
+            }).then(() => {
+                // localStorage.setItem("access_token", response.data.token)
+                // setAuth({isAuth: true})
+                console.log("güncellendi mi ? ")
                 history.push("/")
+            }).catch((error) => {
+                if (error.response) {
+                    actions.setStatus({error: error.response.data.message})
+                    return
+                }
+                actions.setStatus({error: error.toString()})
             })
         },
     });
@@ -85,7 +106,7 @@ export default function EditTodo() {
         async function readTodos() {
             axios({
                 method: 'get',
-                url: `http://localhost:8000/todos/${editValue.id}`
+                url: `http://localhost:8000/v1/todos/${editValue.id}`
             }).then((response) => {
                 setTodos(response.data)
                 console.log(response.data)
@@ -98,10 +119,18 @@ export default function EditTodo() {
 
         !ignored && readTodos();
         return () => {
-            // eslint-disable-next-line react-hooks/exhaustive-deps
             ignored = true
         }
     }, []);
+
+    // const [state, setState] = React.useState({
+    //     checked: todos.completed
+    // });
+    //
+    // const handleChange = (event) => {
+    //     setState({...state, [event.target.name]: event.target.checked});
+    //     console.log(state)
+    // };
 
     return <>
         <Container component="main" maxWidth="xs">
@@ -146,9 +175,21 @@ export default function EditTodo() {
                                 helperText={formik.touched.description && formik.errors.description}
                             />
                         </Grid>
-                        <Grid item xs={12}>
-                            <CheckBox/>
-                        </Grid>
+                        {/*<Grid item xs={12}>*/}
+                        {/*    <FormControlLabel*/}
+                        {/*        control={*/}
+                        {/*            <Checkbox*/}
+                        {/*                checked={state.checked}*/}
+                        {/*                onChange={() => {*/}
+                        {/*                    handleChange()*/}
+                        {/*                }}*/}
+                        {/*                name="checked"*/}
+                        {/*                color="primary"*/}
+                        {/*            />*/}
+                        {/*        }*/}
+                        {/*        label="Done"*/}
+                        {/*    />*/}
+                        {/*</Grid>*/}
                     </Grid>
                     <Button
                         type="submit"

@@ -14,6 +14,11 @@ import {
 } from "@material-ui/core";
 import {AddBox, Delete, Edit} from "@material-ui/icons";
 import {Link} from "react-router-dom";
+import ReactTimeAgo from "react-time-ago";
+import TimeAgo from 'javascript-time-ago';
+import en from 'javascript-time-ago/locale/en';
+
+TimeAgo.addLocale(en)
 
 export default function Todos() {
     const [todos, setTodos] = useState([])
@@ -21,18 +26,18 @@ export default function Todos() {
     const [loading, setLoading] = useState(false)
     let ignored = false
 
-    const [state, setState] = React.useState({
-        checked: false
-    });
-
-    const handleChange = (event) => {
-        setState({...state, [event.target.name]: event.target.checked});
-    };
+    // const [state, setState] = React.useState({
+    //     checked: false
+    // });
+    //
+    // const handleChange = (event) => {
+    //     setState({...state, [event.target.name]: event.target.checked});
+    // };
 
     const deleteTodo = (id) => {
         axios({
             method: 'delete',
-            url: `http://localhost:8000/todos/${id}`
+            url: `http://localhost:8000/v1/todos/${id}`
         }).then((response) => {
             const updatedTodos = todos.filter(todo => todo.id !== id)
             setTodos(updatedTodos)
@@ -44,11 +49,11 @@ export default function Todos() {
     }
 
     const changeTodoStatus = (updatedState) => {
-        axios.put('http://localhost:8000/todos/' + updatedState.id, {...updatedState})
+        axios.put('http://localhost:8000/v1/todos/done', {...updatedState})
             .then(response => {
                 setTodos(prevState => prevState.map(todo => (todo.id === response.data.id ? {
                     ...todo,
-                    done: !response.data.done
+                    completed: response.data.completed
                 } : todo)))
             })
             .catch((error) => {
@@ -75,10 +80,10 @@ export default function Todos() {
 
             axios({
                 method: 'get',
-                url: 'http://localhost:8000/todos'
+                url: 'http://localhost:8000/v1/todos?size=10'
             }).then((response) => {
-                setTodos(response.data)
-                // console.log(response);
+                setTodos(response.data.content)
+                console.log(response.data);
                 setPagination({
                     size: response.data.length,
                     page: response.data.page,
@@ -104,7 +109,7 @@ export default function Todos() {
     const handleChangePage = (event, newPage) => {
         axios({
             method: 'get',
-            url: `http://localhost:8000/todos?page=${newPage}&size=${pagination.size}`
+            url: `http://localhost:8000/v1/todos?page=${newPage}&size=${pagination.size}`
         }).then((response) => {
             setTodos(response.data)
             setPagination({
@@ -121,7 +126,7 @@ export default function Todos() {
     const handleChangeRowsPerPage = (event) => {
         axios({
             method: 'get',
-            url: `http://localhost:8000/todos?page=0&size=${parseInt(event.target.value, 10)}`
+            url: `http://localhost:8000/v1/todos?page=0&size=${parseInt(event.target.value, 10)}`
         }).then((response) => {
             setTodos(response.data)
             setPagination({
@@ -159,8 +164,9 @@ export default function Todos() {
                         <TableCell align="left"> ID </TableCell>
                         <TableCell align="left"> Title </TableCell>
                         <TableCell align="left"> Description </TableCell>
-                        <TableCell align="left"> Done </TableCell>
+                        <TableCell align="left"> Completed </TableCell>
                         <TableCell align="left"> Created - Date </TableCell>
+                        <TableCell align="left"> Updated - Date </TableCell>
                         <TableCell align="left"/>
                         <TableCell align="left"/>
                     </TableRow>
@@ -172,7 +178,7 @@ export default function Todos() {
                                 <FormControlLabel
                                     control={
                                         <Checkbox
-                                            checked={todo.done}
+                                            checked={todo.completed}
                                             onChange={() => {
                                                 changeTodoStatus(todo)
                                             }}
@@ -186,8 +192,19 @@ export default function Todos() {
                             <TableCell> {todo.id} </TableCell>
                             <TableCell> {todo.title} </TableCell>
                             <TableCell> {todo.description} </TableCell>
-                            <TableCell> {todo.done} </TableCell>
-                            <TableCell> {todo.createdDate} </TableCell>
+                            <TableCell> {todo.completed} </TableCell>
+                            {/*<TableCell> {todo.createdAt} </TableCell>*/}
+                            <TableCell>
+                                <ReactTimeAgo className="hover:underline ml-1 cursor-pointer" date={todo.createdAt}
+                                              locale="en-US"
+                                              timeStyle="round-minute"/>
+                            </TableCell>
+                            {/*<TableCell> {todo.updatedAt} </TableCell>*/}
+                            <TableCell>
+                                <ReactTimeAgo className="hover:underline ml-1 cursor-pointer" date={todo.updatedAt}
+                                              locale="en-US"
+                                              timeStyle="round-minute"/>
+                            </TableCell>
                             <TableCell align="left">
                                 <IconButton aria-label="delete">
                                     <Delete onClick={() => {
@@ -216,7 +233,7 @@ export default function Todos() {
                             count={pagination.totalElements}
                             rowsPerPage={pagination.size}
                             page={pagination.page}
-                            colspan={8}
+                            colspan={9}
                             onChangePage={handleChangePage}
                             onChangeRowsPerPage={handleChangeRowsPerPage}
                         />

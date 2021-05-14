@@ -12,6 +12,8 @@ import * as yup from 'yup';
 import axios from "axios";
 import {useHistory} from "react-router-dom";
 import {Alert} from "@material-ui/lab";
+import {useContext} from "react";
+import {AuthContext} from "../App";
 
 const useStyles = makeStyles((theme) => ({
     paper: {
@@ -53,9 +55,13 @@ export default function AddTodo() {
             // alert(JSON.stringify(values, null, 2));
             axios({
                 method: 'post',
-                url: 'http://localhost:8000/todos',
-                data: values
+                url: 'http://localhost:8000/v1/todos',
+                data: values,
+                // secure: true
             }).then(() => {
+                // localStorage.setItem("access_token", response.data.token)
+                // setAuth({isAuth: true})
+                console.log("eklendi mi ? ")
                 history.push("/")
             }).catch((error) => {
                 if (error.response) {
