@@ -6,7 +6,7 @@ import {
     TextField,
     Typography
 } from "@material-ui/core";
-import {CheckBox, EditTwoTone, SyncTwoTone} from "@material-ui/icons";
+import {EditTwoTone, SyncTwoTone} from "@material-ui/icons";
 import {useFormik} from "formik";
 import * as yup from 'yup';
 import axios from "axios";
@@ -53,16 +53,16 @@ export default function EditTodo() {
             // id: todos.id,
             title: "",
             description: "",
-            // completed: null
+            completed: null
         },
         validationSchema: validationSchema,
-        onSubmit: (updatedState, actions) => {
+        onSubmit: (values, actions) => {
             // alert(JSON.stringify(values, null, 2));
-            // axios.put('http://localhost:8000/v1/todos/', {...updatedState})
+            // axios.put('http://localhost:8000/v1/todos', {...values})
             //     .then(res => {
             //         setTodos(prevState => prevState.map(todo => (todo.id === res.data.id ? {
             //             ...todo,
-            //             // id: res.data.id,
+            //             id: res.data.id,
             //             title: res.data.title,
             //             description: res.data.description,
             //             completed: res.data.completed
@@ -77,20 +77,17 @@ export default function EditTodo() {
             //     }).finally(() => {
             //     history.push("/")
             // })
+
             axios({
                 method: 'put',
                 url: 'http://localhost:8000/v1/todos',
                 data: {
-                    id: updatedState.id,
-                    title: updatedState.title,
-                    description: updatedState,
-                    completed: updatedState.completed
+                    id: editValue.id,
+                    title: values.title,
+                    description: values.description,
+                    completed: values.completed
                 },
-                // secure: true
             }).then(() => {
-                // localStorage.setItem("access_token", response.data.token)
-                // setAuth({isAuth: true})
-                console.log("güncellendi mi ? ")
                 history.push("/")
             }).catch((error) => {
                 if (error.response) {
@@ -132,6 +129,7 @@ export default function EditTodo() {
     //     console.log(state)
     // };
 
+    const [isTrue, setIsTrue] = React.useState(todos.completed)
     return <>
         <Container component="main" maxWidth="xs">
             <div className={classes.paper}>
@@ -145,6 +143,21 @@ export default function EditTodo() {
                     {formik.status && formik.status.error &&
                     <Alert className={classes.formElement} severity="error">{formik.status.error}</Alert>}
                     <Grid container spacing={2}>
+                        <Grid item xs={12}>
+                            <TextField
+                                className={classes.formElement}
+                                variant="outlined"
+                                fullWidth
+                                id="id"
+                                label={editValue.id}
+                                name="id"
+                                autoComplete="id"
+                                value={editValue.id}
+                                onChange={formik.handleChange}
+                                error={formik.touched.title && Boolean(formik.errors.title)}
+                                helperText={formik.touched.title && formik.errors.title}
+                            />
+                        </Grid>
                         <Grid item xs={12}>
                             <TextField
                                 className={classes.formElement}
@@ -175,21 +188,34 @@ export default function EditTodo() {
                                 helperText={formik.touched.description && formik.errors.description}
                             />
                         </Grid>
-                        {/*<Grid item xs={12}>*/}
-                        {/*    <FormControlLabel*/}
-                        {/*        control={*/}
-                        {/*            <Checkbox*/}
-                        {/*                checked={state.checked}*/}
-                        {/*                onChange={() => {*/}
-                        {/*                    handleChange()*/}
-                        {/*                }}*/}
-                        {/*                name="checked"*/}
-                        {/*                color="primary"*/}
-                        {/*            />*/}
-                        {/*        }*/}
-                        {/*        label="Done"*/}
-                        {/*    />*/}
-                        {/*</Grid>*/}
+                        <Grid item xs={12}>
+                            <FormControlLabel
+                                control={
+                                    // <Checkbox
+                                    //     // checked={state.checked}
+                                    //     // onChange={() => {
+                                    //     //     handleChange()
+                                    //     // }}
+                                    //     name="checked"
+                                    //     color="primary"
+                                    // />
+                                    <Checkbox
+                                        checked={todos.completed}
+                                        onChange={
+                                            (e) => {
+                                                console.log("target checked? - ", e.target.checked)
+                                                setIsTrue(e.target.checked)
+                                            }
+                                        }
+                                        value={todos.completed}
+                                        inputProps={{
+                                            'aria-label': 'primary checkbox',
+                                        }}
+                                    />
+                                }
+                                label={todos.completed}
+                            />
+                        </Grid>
                     </Grid>
                     <Button
                         type="submit"

@@ -34,6 +34,8 @@ export default function Todos() {
     //     setState({...state, [event.target.name]: event.target.checked});
     // };
 
+    const [isTrue, setIsTrue] = React.useState(todos.completed)
+
     const deleteTodo = (id) => {
         axios({
             method: 'delete',
@@ -53,13 +55,16 @@ export default function Todos() {
             .then(response => {
                 setTodos(prevState => prevState.map(todo => (todo.id === response.data.id ? {
                     ...todo,
-                    completed: response.data.completed
+                    completed: response.data.completed,
                 } : todo)))
             })
             .catch((error) => {
                 if (error.response) {
                     return
                 }
+            })
+            .finally(() => {
+                window.location.reload(true);
             })
     };
 
@@ -83,7 +88,7 @@ export default function Todos() {
                 url: 'http://localhost:8000/v1/todos?size=10'
             }).then((response) => {
                 setTodos(response.data.content)
-                console.log(response.data);
+                // console.log(response.data);
                 setPagination({
                     size: response.data.length,
                     page: response.data.page,
@@ -185,23 +190,33 @@ export default function Todos() {
                                             name="checked"
                                             color="primary"
                                         />
+                                        // <Checkbox
+                                        //     checked={todo.completed}
+                                        //     onChange={
+                                        //         (e) => {
+                                        //             console.log("target checked? - ", e.target.checked)
+                                        //             setIsTrue(e.target.checked)
+                                        //         }
+                                        //     }
+                                        //     color="primary"
+                                        // />
                                     }
-                                    label="Done"
+                                    label=""
                                 />
                             </TableCell>
                             <TableCell> {todo.id} </TableCell>
                             <TableCell> {todo.title} </TableCell>
                             <TableCell> {todo.description} </TableCell>
-                            <TableCell> {todo.completed} </TableCell>
+                            <TableCell> {todo.completed.toString()} </TableCell>
                             {/*<TableCell> {todo.createdAt} </TableCell>*/}
                             <TableCell>
-                                <ReactTimeAgo className="hover:underline ml-1 cursor-pointer" date={todo.createdAt}
+                                <ReactTimeAgo date={todo.createdAt}
                                               locale="en-US"
                                               timeStyle="round-minute"/>
                             </TableCell>
                             {/*<TableCell> {todo.updatedAt} </TableCell>*/}
                             <TableCell>
-                                <ReactTimeAgo className="hover:underline ml-1 cursor-pointer" date={todo.updatedAt}
+                                <ReactTimeAgo date={todo.updatedAt}
                                               locale="en-US"
                                               timeStyle="round-minute"/>
                             </TableCell>

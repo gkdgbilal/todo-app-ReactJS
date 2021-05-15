@@ -6,14 +6,12 @@ import {
     TextField,
     Typography
 } from "@material-ui/core";
-import {Assignment, CheckBox, Save, SaveAlt} from "@material-ui/icons";
+import {Assignment, Save} from "@material-ui/icons";
 import {useFormik} from "formik";
 import * as yup from 'yup';
 import axios from "axios";
 import {useHistory} from "react-router-dom";
 import {Alert} from "@material-ui/lab";
-import {useContext} from "react";
-import {AuthContext} from "../App";
 
 const useStyles = makeStyles((theme) => ({
     paper: {
